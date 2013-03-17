@@ -1,5 +1,5 @@
 (ns tictactoe.core
-  (:require [clojure.test :refer [deftest is thrown-with-msg?]]))
+  (:require [clojure.test :refer [deftest is]]))
 
 (def board
   [[1 0 1]
