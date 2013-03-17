@@ -1,5 +1,4 @@
-(ns tictactoe.core
-  (:require [clojure.test :refer [deftest is]]))
+(ns tictactoe.core)
 
 (def empty-board
   [[nil nil nil]
@@ -134,9 +133,9 @@
     (if (valid? move board)
       (let [newrow (assoc (nth board row) col piece)]
         (assoc board row newrow))
-      (throw (Exception. (str "Invalid move: player "
-                              piece
-                              " (" row ", " col ")"))))))
+      (.log js/console (str "Invalid move: player "
+                             piece
+                             " (" row ", " col ")")))))
 
 (defn get-turn
   "Takes a 3x3 board (vector of vectors). Returns the player whose turn
@@ -240,9 +239,3 @@
 
 (defn center? [board]
   (not (nil? (get-square 1 1 board))))
-
-;(defn first-move [board]
- ; (cond (corner? board) ;edge
-  ;      (edge? board)   ;center
-   ;     :else ;corner))
-    ;    ))

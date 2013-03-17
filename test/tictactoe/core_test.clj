@@ -78,3 +78,153 @@
                         (make-move [0 2 1] [[nil nil 0]
                                             [nil nil nil]
                                             [nil nil nil]]))))
+
+(deftest first-turn
+  (is (= 0
+         (get-turn empty-board))))
+
+(deftest p1-turn
+  (is (= 0
+         (get-turn [[nil nil nil]
+                    [nil  1  nil]
+                    [ 0  nil nil]]))))
+
+(deftest p0-turn
+  (is (= 1
+         (get-turn [[nil  1  nil]
+                    [nil nil nil]
+                    [nil nil nil]]))))
+
+(deftest board-map
+  (is (= [["X" "O" nil]
+          ["O" "O" "X"]
+          [nil "X" "O"]]
+         (boardmap (fn [s] (cond (= nil s) nil
+                                 (= 1 s) "X"
+                                 (= 0 s) "O"))
+                   [[ 1  0 nil]
+                    [ 0  0  1 ]
+                    [nil 1  0 ]]))))
+
+(deftest unflatten-board
+  (is (= [[ 0  nil  0 ]
+          [ 1   0   1 ]
+          [nil nil  0 ]]
+         (unflatten [0 nil 0 1 0 1 nil nil 0]))))
+
+(deftest next-board-empty
+  (is (= '([ 0  nil nil nil nil nil nil nil nil] 
+           [nil  0  nil nil nil nil nil nil nil] 
+           [nil nil  0  nil nil nil nil nil nil] 
+           [nil nil nil  0  nil nil nil nil nil] 
+           [nil nil nil nil  0  nil nil nil nil] 
+           [nil nil nil nil nil  0  nil nil nil] 
+           [nil nil nil nil nil nil  0  nil nil] 
+           [nil nil nil nil nil nil nil  0  nil] 
+           [nil nil nil nil nil nil nil nil  0 ])
+         (next-boards empty-board))))
+
+(deftest next-board-p1
+  (is (= '([0  1  nil nil nil nil nil nil nil] 
+           [0 nil  1  nil nil nil nil nil nil] 
+           [0 nil nil  1  nil nil nil nil nil] 
+           [0 nil nil nil  1  nil nil nil nil] 
+           [0 nil nil nil nil  1  nil nil nil] 
+           [0 nil nil nil nil nil  1  nil nil] 
+           [0 nil nil nil nil nil nil  1  nil] 
+           [0 nil nil nil nil nil nil nil  1 ])
+         (next-boards [[ 0  nil nil]
+                       [nil nil nil]
+                       [nil nil nil]]))))
+
+(deftest next-board-p0
+  (is (= '([0  0  nil 1 nil nil nil nil nil] 
+           [0 nil  0  1 nil nil nil nil nil] 
+           [0 nil nil 1  0  nil nil nil nil] 
+           [0 nil nil 1 nil  0  nil nil nil] 
+           [0 nil nil 1 nil nil  0  nil nil] 
+           [0 nil nil 1 nil nil nil  0  nil] 
+           [0 nil nil 1 nil nil nil nil  0 ])
+         (next-boards [[ 0  nil nil]
+                       [ 1  nil nil]
+                       [nil nil nil]]))))
+
+(deftest score-p0-win
+  (is (= 1
+         (score-board (flatten [[ 0   0   0 ]
+                                [nil  1   1 ]
+                                [nil nil nil]])))))
+
+(deftest score-p1-win
+  (is (= -1
+         (score-board (flatten [[ 1  nil nil]
+                                [ 1   0  nil]
+                                [ 1  nil  0 ]])))))
+
+(deftest score-no-win
+  (is (= 0
+         (score-board (flatten [[ 1  nil nil]
+                                [nil  0  nil]
+                                [ 1  nil  0 ]])))))
+
+(deftest sum-of-leaves
+  (is (= 80
+         (add-leaves '(10 (5 5 (10 10 10 (5 (10 10) 5))))))))
+
+(deftest count-ten-leaves
+  (is (= 10
+         (count-leaves '((0) 1 2 (3 4) 5 (6 (7 8)) 9)))))
+
+(deftest win-on-board
+  (is (= true
+         (win? [[ 1 nil nil]
+                [ 1  0  nil]
+                [ 1 nil  0 ]]))))
+
+(deftest p0-win-scores
+  (is (= [[ 0   1  nil] 
+          [ 0   1  nil] 
+          [ 0  nil nil]]
+        (best-move [[ 0   1  nil]
+                    [ 0   1  nil]
+                    [nil nil nil]]))))
+
+(deftest p0-play-center
+  (is (= [[ 0   1  nil]
+          [nil  0  nil]
+          [nil nil nil]]
+         (best-move [[ 0   1  nil]
+                     [nil nil nil]
+                     [nil nil nil]]))))
+
+(deftest p0-block-win
+  (is (= [[ 0   1   0 ] 
+          [nil  1  nil] 
+          [nil  0  nil]]
+         (best-move [[ 0   1   0 ]
+                     [nil  1  nil]
+                     [nil nil nil]]))))
+
+(deftest get-1-2
+  (is (= 0
+         (get-square 1 2 [[1 0 1]
+                          [1 1 0]
+                          [0 0 1]]))))
+
+(deftest edge
+  (is (= true
+         (edge? [[nil  1  nil]
+                 [nil nil nil]
+                 [nil nil nil]]))))
+
+(deftest corner
+  (is (= true
+         (corner? [[ 1  nil nil]
+                   [nil nil nil]
+                   [nil nil nil]]))))
+
+(deftest center
+  (is (= true
+         (center? [[nil nil nil]
+                   [nil  1  nil]
+                   [nil nil nil]]))))

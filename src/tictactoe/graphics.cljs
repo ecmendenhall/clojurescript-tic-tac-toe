@@ -1,4 +1,5 @@
-(ns tictactoe.graphics)
+(ns tictactoe.canvas
+  (:require [tictactoe.core :refer [make-move empty-board]]))
 
 (defn get-canvas [id]
     (.getElementById js/document id))
@@ -11,6 +12,7 @@
   (def column-coords (for [x (range (+ step 10) width step)
                            y [10 (- width 10)]]
                       (list x y)))
+  (def board empty-board)
   
   (defn draw-line [start end]
     (.moveTo context (first start) (second start))
@@ -36,18 +38,58 @@
 
   (defn draw-move [row col piece]
     (set! (.-font context) (str (+ 20 step) "px Menlo"))
+    (set! (.-fillStyle context) "black")
     (.fillText context piece (col-coordinate col) (row-coordinate row)))
 
+  (defn clear [row col]
+    (let [c (col-coordinate col)
+          r (row-coordinate row)]
+      (.beginPath context)
+      (.rect context c (+ 20 (- r step)) (- step 30) (- step 15))
+      (set! (.-fillStyle context) "white")
+      (.fill context)))
+
+  (defn update-board [board]
+    (defn update-iter [pieces row col]
+      (when (not (empty? pieces))
+        (clear row col)
+        (let [piece (first pieces)]
+          (when piece
+            (draw-move row col (if (= 1 piece) "X" "O"))))
+        (if (= 2 col) 
+          (update-iter (rest pieces) (inc row) 0)
+          (update-iter (rest pieces) row (inc col)))))
+    (update-iter (flatten board) 0 0))
+
+  (defn add-click-listener [f]
+    (.addEventListener canvas "click" f false))
+
+  (defn canvas-coords [e]
+    (if (and (.-pageX e) (.-pageY e))
+      [(- (.-pageX e)
+          (.-offsetLeft canvas))
+       (- (.-pageY e)
+          (.-offsetTop canvas))]
+      [(- (+ (.clientX e)
+             (.-scrollLeft (.-body js/document))
+              (.-scrollLeft (.-documentElement js/document)))
+          (.-offsetLeft canvas))
+       (- (+ (.clientY e)
+             (.-scrollTop (.-body js/document))
+             (.-scrollTop (.-documentElement js/document)))
+          (.-offsetTop canvas))]))
+
+  (defn canvas->grid [coord]
+    (reverse (map (fn [x] (.floor js/Math (/ x step))) coord)))
+
+  (defn canvas-click [e]
+    (let [grid-coords (canvas->grid (canvas-coords e))]
+      (.log js/console (clj->js grid-coords))
+      (.log js/console (clj->js board))
+      (update-board (make-move [(first grid-coords) (second grid-coords) 1]
+                               board))))
+
   (draw-grid 5)
-  
-  (draw-move 0 0 "X")
-  (draw-move 0 1 "O")
-  (draw-move 0 2 "X")
-  (draw-move 1 0 "O")
-  (draw-move 1 1 "X")
-  (draw-move 1 2 "X")
-  (draw-move 2 0 "O")
-  (draw-move 2 1 "X")
-  (draw-move 2 2 "O"))
+  (add-click-listener canvas-click))
 
 (.addEventListener js/window "DOMContentLoaded" new-board)
