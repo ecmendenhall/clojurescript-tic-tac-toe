@@ -97,9 +97,6 @@
       (update-board (make-move [(first grid-coords) (second grid-coords) 1]
                                @board))
       (update-board (best-move @board))))
-      ;(if (first-move? @board)
-      ; (update-board (get-first-move @board)) 
-      ; (update-board (best-move @board)))))
 
   (draw-grid 5)
   (add-click-listener canvas-click))

@@ -219,29 +219,52 @@
 (defn win-in-boards? [boards]
   (not (empty? (remove false? (map win? (map unflatten boards))))))
 
-(defn score-moves [current-board]
+(defn scr [current-board]
   "Takes a 3x3 game board (vector of vectors). Returns a map of possible
    moves (flattened boards) and their scores (rationals)."
   (defn recursive-score [current-board]
+    (if (win? current-board)
+      (score-board current-board))
     (let [boards (next-boards current-board)]
       (if (empty? boards)
         (score-board current-board)
-        (if (win-in-boards? boards)
-          (map score-board (map unflatten boards))
-          (map recursive-score (map unflatten boards))))))
-  (if (= 1 (get-turn current-board))
-    (map vector (map min-leaf 
-                     (recursive-score current-board))
-                (map unflatten (next-boards current-board)))
-    (map vector (map max-leaf
-                     (recursive-score current-board))
-                (map unflatten (next-boards current-board)))))
+        (map recursive-score (map unflatten boards))))))
 
-(defn best-move [current-board]
-  (second (last (sort-by first (score-moves current-board)))))
+(defn full? [board]
+  (= 9 (count (remove nil? (flatten board)))))
+
+(defn score-move [current-board]
+  (if (or (win? current-board) (full? current-board))
+    (score-board current-board)
+    (let [next-moves (next-boards current-board)]
+      (if (= 0 (get-turn current-board))
+        (max-leaf (map score-move (map unflatten next-moves)))
+        (min-leaf (map score-move (map unflatten next-moves)))))))
+      
 
 (defn get-square [row col board]
   (nth (nth board row) col))
+
+(defn opening? [board]
+  (= 1 (count (remove nil? (flatten board)))))
+
+(defn opening-move [board]
+  (cond (= 1 (get-square 0 0 board)) (make-move [1 1 0] board)
+        (= 1 (get-square 0 1 board)) (make-move [2 1 0] board)
+        (= 1 (get-square 0 2 board)) (make-move [1 1 0] board)
+        (= 1 (get-square 1 0 board)) (make-move [2 0 0] board)
+        (= 1 (get-square 1 1 board)) (make-move [2 2 0] board)
+        (= 1 (get-square 1 2 board)) (make-move [2 2 0] board)
+        (= 1 (get-square 2 0 board)) (make-move [1 1 0] board)
+        (= 1 (get-square 2 1 board)) (make-move [2 2 0] board)
+        (= 1 (get-square 2 2 board)) (make-move [1 1 0] board)))
+
+(defn best-move [current-board]
+  (if (opening? current-board)
+    (opening-move current-board)
+    (let [movescores (map vector (map score-move (map unflatten (next-boards current-board)))
+                                 (map unflatten (next-boards current-board)))]
+      (second (last (sort-by first movescores))))))
 
 (defn corner? [board]
   (not (empty? (remove nil? (map (fn [x] (get-square (first x)
