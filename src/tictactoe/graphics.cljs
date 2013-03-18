@@ -1,5 +1,7 @@
 (ns tictactoe.canvas
-  (:require [tictactoe.core :refer [make-move empty-board best-move]]))
+  (:require [tictactoe.core :refer [make-move 
+                                    empty-board 
+                                    best-move]]))
 
 (defn get-canvas [id]
     (.getElementById js/document id))
@@ -27,7 +29,7 @@
                            (split-at 2 (map reverse column-coords)))]
       (draw-line (first points) (second points)))
     
-    (line-style {:width 5 :color "#000"})
+    (line-style {:width 5 :color "#999"})
     (.stroke context))
   
   (defn row-coordinate [row]
@@ -37,8 +39,12 @@
     (+ 30 (* step col)))
 
   (defn draw-move [row col piece]
+    (.log js/console "draw-move")
+    (.log js/console piece)
     (set! (.-font context) (str (+ 20 step) "px Menlo"))
-    (set! (.-fillStyle context) "black")
+    (if (= "X" piece)
+      (set! (.-fillStyle context) "#7FA0FF")
+      (set! (.-fillStyle context) "#89DA0F"))
     (.fillText context piece (col-coordinate col) (row-coordinate row)))
 
   (defn clear [row col]
@@ -46,7 +52,7 @@
           r (row-coordinate row)]
       (.beginPath context)
       (.rect context c (+ 20 (- r step)) (- step 30) (- step 15))
-      (set! (.-fillStyle context) "white")
+      (set! (.-fillStyle context) "#eee")
       (.fill context)))
 
   (defn update-board [newboard]
@@ -91,6 +97,9 @@
       (update-board (make-move [(first grid-coords) (second grid-coords) 1]
                                @board))
       (update-board (best-move @board))))
+      ;(if (first-move? @board)
+      ; (update-board (get-first-move @board)) 
+      ; (update-board (best-move @board)))))
 
   (draw-grid 5)
   (add-click-listener canvas-click))

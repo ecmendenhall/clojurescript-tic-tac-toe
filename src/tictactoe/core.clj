@@ -187,10 +187,10 @@
    0, -1 if it contains a win for player 1, 0 if it's a draw.
   "
   [board]
-  (reduce + (map (fn [x] (cond (= x 0)  1
-                               (= x 1) -1
-                               :else    0))
-                 (check-for-wins (unflatten board)))))
+  (let [wins (check-for-wins board)]
+    (cond (in-row? wins 0)  1
+          (in-row? wins 1) -1
+          :else             0)))
 
 (defn add-leaves 
   "Returns the sum of the leaves of a given tree."
@@ -206,19 +206,36 @@
     (reduce + 0 (map count-leaves tree))
     1))
 
+(defn min-leaf [tree]
+  (if (coll? tree)
+    (apply min (flatten tree))
+    tree))
+
+(defn max-leaf [tree]
+  (if (coll? tree)
+    (apply max (flatten tree))
+    tree))
+
+(defn win-in-boards? [boards]
+  (not (empty? (remove false? (map win? (map unflatten boards))))))
+
 (defn score-moves [current-board]
   "Takes a 3x3 game board (vector of vectors). Returns a map of possible
    moves (flattened boards) and their scores (rationals)."
   (defn recursive-score [current-board]
     (let [boards (next-boards current-board)]
       (if (empty? boards)
-        (score-board (flatten current-board))
-        (for [b boards]
-          (recursive-score (unflatten b))))))
-  (map vector (map (fn [b] (/ (add-leaves b)
-                              (count-leaves b))) 
-                   (recursive-score current-board))
-              (map unflatten (next-boards current-board))))
+        (score-board current-board)
+        (if (win-in-boards? boards)
+          (map score-board (map unflatten boards))
+          (map recursive-score (map unflatten boards))))))
+  (if (= 1 (get-turn current-board))
+    (map vector (map min-leaf 
+                     (recursive-score current-board))
+                (map unflatten (next-boards current-board)))
+    (map vector (map max-leaf
+                     (recursive-score current-board))
+                (map unflatten (next-boards current-board)))))
 
 (defn best-move [current-board]
   (second (last (sort-by first (score-moves current-board)))))
@@ -242,9 +259,3 @@
 
 (defn center? [board]
   (not (nil? (get-square 1 1 board))))
-
-;(defn first-move [board]
- ; (cond (corner? board) ;edge
-  ;      (edge? board)   ;center
-   ;     :else ;corner))
-    ;    ))
