@@ -1,5 +1,5 @@
 (ns tictactoe.canvas
-  (:require [tictactoe.core :refer [make-move empty-board]]))
+  (:require [tictactoe.core :refer [make-move empty-board best-move]]))
 
 (defn get-canvas [id]
     (.getElementById js/document id))
@@ -12,7 +12,7 @@
   (def column-coords (for [x (range (+ step 10) width step)
                            y [10 (- width 10)]]
                       (list x y)))
-  (def board empty-board)
+  (def board (atom empty-board))
   
   (defn draw-line [start end]
     (.moveTo context (first start) (second start))
@@ -49,7 +49,9 @@
       (set! (.-fillStyle context) "white")
       (.fill context)))
 
-  (defn update-board [board]
+  (defn update-board [newboard]
+    (swap! board (fn [] newboard))
+    (.log js/console (clj->js @board))
     (defn update-iter [pieces row col]
       (when (not (empty? pieces))
         (clear row col)
@@ -59,7 +61,7 @@
         (if (= 2 col) 
           (update-iter (rest pieces) (inc row) 0)
           (update-iter (rest pieces) row (inc col)))))
-    (update-iter (flatten board) 0 0))
+    (update-iter (flatten newboard) 0 0))
 
   (defn add-click-listener [f]
     (.addEventListener canvas "click" f false))
@@ -85,9 +87,10 @@
   (defn canvas-click [e]
     (let [grid-coords (canvas->grid (canvas-coords e))]
       (.log js/console (clj->js grid-coords))
-      (.log js/console (clj->js board))
+      (.log js/console (clj->js @board))
       (update-board (make-move [(first grid-coords) (second grid-coords) 1]
-                               board))))
+                               @board))
+      (update-board (best-move @board))))
 
   (draw-grid 5)
   (add-click-listener canvas-click))

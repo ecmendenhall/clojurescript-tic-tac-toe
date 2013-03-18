@@ -80,17 +80,17 @@
                                             [nil nil nil]]))))
 
 (deftest first-turn
-  (is (= 0
+  (is (= 1
          (get-turn empty-board))))
 
 (deftest p1-turn
-  (is (= 0
+  (is (= 1
          (get-turn [[nil nil nil]
                     [nil  1  nil]
                     [ 0  nil nil]]))))
 
 (deftest p0-turn
-  (is (= 1
+  (is (= 0
          (get-turn [[nil  1  nil]
                     [nil nil nil]
                     [nil nil nil]]))))
@@ -113,38 +113,38 @@
          (unflatten [0 nil 0 1 0 1 nil nil 0]))))
 
 (deftest next-board-empty
-  (is (= '([ 0  nil nil nil nil nil nil nil nil] 
-           [nil  0  nil nil nil nil nil nil nil] 
-           [nil nil  0  nil nil nil nil nil nil] 
-           [nil nil nil  0  nil nil nil nil nil] 
-           [nil nil nil nil  0  nil nil nil nil] 
-           [nil nil nil nil nil  0  nil nil nil] 
-           [nil nil nil nil nil nil  0  nil nil] 
-           [nil nil nil nil nil nil nil  0  nil] 
-           [nil nil nil nil nil nil nil nil  0 ])
+  (is (= '([ 1  nil nil nil nil nil nil nil nil] 
+           [nil  1  nil nil nil nil nil nil nil] 
+           [nil nil  1  nil nil nil nil nil nil] 
+           [nil nil nil  1  nil nil nil nil nil] 
+           [nil nil nil nil  1  nil nil nil nil] 
+           [nil nil nil nil nil  1  nil nil nil] 
+           [nil nil nil nil nil nil  1  nil nil] 
+           [nil nil nil nil nil nil nil  1  nil] 
+           [nil nil nil nil nil nil nil nil 1  ])
          (next-boards empty-board))))
 
 (deftest next-board-p1
-  (is (= '([0  1  nil nil nil nil nil nil nil] 
-           [0 nil  1  nil nil nil nil nil nil] 
-           [0 nil nil  1  nil nil nil nil nil] 
-           [0 nil nil nil  1  nil nil nil nil] 
-           [0 nil nil nil nil  1  nil nil nil] 
-           [0 nil nil nil nil nil  1  nil nil] 
-           [0 nil nil nil nil nil nil  1  nil] 
-           [0 nil nil nil nil nil nil nil  1 ])
-         (next-boards [[ 0  nil nil]
+  (is (= '([1  0  nil nil nil nil nil nil nil] 
+           [1 nil  0  nil nil nil nil nil nil] 
+           [1 nil nil  0  nil nil nil nil nil] 
+           [1 nil nil nil  0  nil nil nil nil] 
+           [1 nil nil nil nil  0  nil nil nil] 
+           [1 nil nil nil nil nil  0  nil nil] 
+           [1 nil nil nil nil nil nil  0  nil] 
+           [1 nil nil nil nil nil nil nil  0 ])
+         (next-boards [[ 1  nil nil]
                        [nil nil nil]
                        [nil nil nil]]))))
 
 (deftest next-board-p0
-  (is (= '([0  0  nil 1 nil nil nil nil nil] 
-           [0 nil  0  1 nil nil nil nil nil] 
-           [0 nil nil 1  0  nil nil nil nil] 
-           [0 nil nil 1 nil  0  nil nil nil] 
-           [0 nil nil 1 nil nil  0  nil nil] 
-           [0 nil nil 1 nil nil nil  0  nil] 
-           [0 nil nil 1 nil nil nil nil  0 ])
+  (is (= '([0  1  nil 1 nil nil nil nil nil] 
+           [0 nil  1  1 nil nil nil nil nil] 
+           [0 nil nil 1  1  nil nil nil nil] 
+           [0 nil nil 1 nil  1  nil nil nil] 
+           [0 nil nil 1 nil nil  1  nil nil] 
+           [0 nil nil 1 nil nil nil  1  nil] 
+           [0 nil nil 1 nil nil nil nil  1 ])
          (next-boards [[ 0  nil nil]
                        [ 1  nil nil]
                        [nil nil nil]]))))
@@ -182,26 +182,26 @@
                 [ 1 nil  0 ]]))))
 
 (deftest p0-win-scores
-  (is (= [[ 0   1  nil] 
+  (is (= [[ 0   1   1 ] 
           [ 0   1  nil] 
           [ 0  nil nil]]
-        (best-move [[ 0   1  nil]
+        (best-move [[ 0   1   1 ]
                     [ 0   1  nil]
                     [nil nil nil]]))))
 
 (deftest p0-play-center
-  (is (= [[ 0   1  nil]
+  (is (= [[ 0   1   1 ]
           [nil  0  nil]
           [nil nil nil]]
-         (best-move [[ 0   1  nil]
+         (best-move [[ 0   1   1 ] 
                      [nil nil nil]
                      [nil nil nil]]))))
 
 (deftest p0-block-win
-  (is (= [[ 0   1   0 ] 
+  (is (= [[ 1   0  nil] 
           [nil  1  nil] 
-          [nil  0  nil]]
-         (best-move [[ 0   1   0 ]
+          [nil nil  0 ]]
+         (best-move [[ 1   0  nil]
                      [nil  1  nil]
                      [nil nil nil]]))))
 

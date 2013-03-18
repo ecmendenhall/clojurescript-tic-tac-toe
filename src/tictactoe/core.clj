@@ -144,7 +144,9 @@
    the board, as it's only used to construct the game tree.
   "
   [board]
-  (mod (reduce + (map (fn [x] (if (= nil x) 0 1)) (flatten board))) 2))
+  (if (odd? (reduce + (map (fn [x] (if (= nil x) 0 1)) (flatten board))))
+    0
+    1))
 
 (defn unflatten 
   "Takes a flattened board (vector of length 9). Returns a 3x3 vector of
