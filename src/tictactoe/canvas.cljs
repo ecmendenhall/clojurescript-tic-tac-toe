@@ -36,21 +36,6 @@
                       (list x y)))
   (def board (atom empty-board))
 
-  (defn load-x []
-    (let [x (.createElement js/document "img")]
-      (.setAttribute x "src" "X.png")
-      x))
-
-  (def x-img (load-x))
-
-  (defn load-o[]
-    (let [o (.createElement js/document "img")]
-      (.setAttribute o "src" "O.png")
-      o))
-
-  (def o-img (load-o))
-
-  
   (defn draw-line 
     "Canvas line wrapper. Takes start and end coordinates and a map of style attributes."
     [start end style]
@@ -93,7 +78,9 @@
     "Draws the given piece in (row, col) on the tic-tac-toe grid."
     [row col piece]
     (.drawImage context 
-                (if (= piece "X") x-img o-img)
+                (if (= piece "X") 
+                  (.getElementById js/document "x-img")
+                  (.getElementById js/document "o-img"))
                 (col-coordinate col) 
                 (row-coordinate row)
                 (* 0.7 step)
