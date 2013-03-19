@@ -5,6 +5,6 @@
     :builds [{
       :source-paths ["src/tictactoe"]
       :compiler {
-        :output-to "resources/static/graphics.js"
-        :optimizations :whitespace
-        :pretty-print true}}]})
+        :output-to "resources/static/ttt-canvas.js"
+        :optimizations :advanced
+        :pretty-print false}}]})

@@ -167,13 +167,13 @@
                        [nil  0  nil]
                        [ 1  nil  0 ]]))))
 
-(deftest sum-of-leaves
-  (is (= 80
-         (add-leaves '(10 (5 5 (10 10 10 (5 (10 10) 5))))))))
-
-(deftest count-ten-leaves
-  (is (= 10
-         (count-leaves '((0) 1 2 (3 4) 5 (6 (7 8)) 9)))))
+;(deftest sum-of-leaves
+;  (is (= 80
+;         (add-leaves '(10 (5 5 (10 10 10 (5 (10 10) 5))))))))
+;
+;(deftest count-ten-leaves
+;  (is (= 10
+;         (count-leaves '((0) 1 2 (3 4) 5 (6 (7 8)) 9)))))
 
 (deftest win-on-board
   (is (= true
@@ -275,20 +275,98 @@
                           [1 1 0]
                           [0 0 1]]))))
 
-(deftest edge
-  (is (= true
-         (edge? [[nil  1  nil]
-                 [nil nil nil]
-                 [nil nil nil]]))))
+;(deftest edge
+;  (is (= true
+;         (edge? [[nil  1  nil]
+;                 [nil nil nil]
+;                 [nil nil nil]]))))
 
-(deftest corner
-  (is (= true
-         (corner? [[ 1  nil nil]
-                   [nil nil nil]
-                   [nil nil nil]]))))
+;(deftest corner
+;  (is (= true
+;         (corner? [[ 1  nil nil]
+;                   [nil nil nil]
+;                   [nil nil nil]]))))
 
-(deftest center
+;(deftest center
+;  (is (= true
+;         (center? [[nil nil nil]
+;                   [nil  1  nil]
+;                   [nil nil nil]]))))
+
+(deftest tree-min
+  (is (= 0
+         (min-leaf '((10) (9 8 (7) (6 5 (4)) 3) 2 (1 (0)))))))
+
+(deftest tree-max
+  (is (= 10
+         (max-leaf '((10) (9 8 (7) (6 5 (4)) 3) 2 (1 (0)))))))
+
+(deftest win-in-nextboards
   (is (= true
-         (center? [[nil nil nil]
-                   [nil  1  nil]
-                   [nil nil nil]]))))
+         (win-in-boards? [[1 1 1 nil 0 0 nil nil nil] 
+                          [nil nil nil nil nil nil nil nil nil]]))))
+
+(deftest no-win-in-nextboards
+  (is (= false
+         (win-in-boards? [[0 1 1 nil 0 0 nil nil nil] 
+                          [nil nil nil nil nil nil nil nil nil]]))))
+
+(deftest full-board
+  (is (= true
+         (full? [[1 1 0] [0 0 1] [1 1 0]]))))
+
+(deftest one-space-left
+  (is (= false
+         (full? [[nil 1 0] [0 0 1] [1 1 0]]))))
+
+(deftest get-1-1
+  (is (= 1
+         (get-square 1 1 [[0 nil nil] [nil 1 1] [nil 0 nil]]))))
+
+(deftest get-0-0
+  (is (= 0
+         (get-square 0 0 [[0 nil nil] [nil 1 1] [nil nil nil]]))))
+
+(deftest get-2-1
+  (is (= nil
+         (get-square 2 1 [[0 nil nil] [nil 1 1] [nil nil nil]]))))
+
+(deftest opening-position
+  (is (= true
+         (opening? [[1 nil nil] [nil nil nil] [nil nil nil]]))))
+
+(deftest not-an-opening
+  (is (= false
+         (opening? [[1 0 nil] [nil nil nil] [nil nil nil]]))))
+
+(deftest all-nil
+  (is (= false
+         (not-empty-row? [nil nil nil]))))
+
+(deftest one-zero
+  (is (= true
+         (not-empty-row? [0 nil nil]))))
+
+(deftest col1-win
+  (is (= 1
+         (get-row-win [nil 1 nil]))))
+
+(deftest right-diag-win
+  (is (= [1 [0 0] [1 1] [2 2]]
+         (get-win [[1 nil nil] [nil 1 nil] [nil nil 1]]))))
+
+(deftest left-diag-win
+  (is (= [1 [0 2] [1 1] [2 0]]
+         (get-win [[nil nil 1] [nil 1 nil] [1 nil nil]]))))
+
+(deftest col2-win
+  (is (= [0 [0 2] [1 2] [2 2]]
+         (get-win [[nil nil 0] [nil nil 0] [nil nil 0]]))))
+
+(deftest row1-win
+  (is (= [0 [1 0] [1 1] [1 2]]
+         (get-win [[nil nil nil] [0 0 0] [nil nil nil]]))))
+
+(deftest no-win
+  (is (= nil
+         (get-win [[1 0 1] [1 0 1] [0 1 0]]))))

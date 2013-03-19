@@ -91,6 +91,12 @@
           (map winner (columns board))
           (map winner (diagonals board))))
 
+(defn full? 
+  "Takes a 3x3 board (vector of vectors) returns true if all squares are full,
+  else false."
+  [board]
+  (= 9 (count (remove nil? (flatten board)))))
+
 (defn win?
   "Takes a 3x3 tic-tac-toe board (vector of vectors). Returns true
   if a win is found on the board, else false.
@@ -101,7 +107,14 @@
      true
   "
   [board]
-    (not (empty? (remove nil? (check-for-wins board)))))
+  (if (nil? board) false
+    (not (empty? (remove nil? (check-for-wins board))))))
+
+(defn draw?
+  "Takes a 3x3 tic-tac-toe board (vector of vectors). Returns true
+  if the board is a draw, else false."
+  [board]
+  (and (full? board) (not (win? board))))
 
 (defn valid? 
   "Takes a move (vector of row, column, player) and a 3x3 board.
@@ -192,48 +205,54 @@
           (in-row? wins 1) -1
           :else             0)))
 
-(defn add-leaves 
-  "Returns the sum of the leaves of a given tree."
+(defn min-leaf
+  "Returns the smallest leaf of the given tree. Takes a number or collection, 
+  returns a number.
+  "
   [tree]
-  (if (coll? tree)
-    (reduce + 0 (map add-leaves tree))
-    tree))
-
-(defn count-leaves 
-  "Returns the number of leaves in a given tree."
-  [tree]
-  (if (coll? tree)
-    (reduce + 0 (map count-leaves tree))
-    1))
-
-(defn min-leaf [tree]
   (if (coll? tree)
     (apply min (flatten tree))
     tree))
 
-(defn max-leaf [tree]
+(defn max-leaf
+  "Returns the largest leaf of the given tree. Takes a number or collection,
+  returns a number.
+  "
+  [tree]
   (if (coll? tree)
     (apply max (flatten tree))
     tree))
 
-(defn win-in-boards? [boards]
+(defn win-in-boards? 
+  "Checks a list of flattened boards for wins. Returns true if a win by either
+  player is found, else false."
+  [boards]
   (not (empty? (remove false? (map win? (map unflatten boards))))))
 
-(defn scr [current-board]
-  "Takes a 3x3 game board (vector of vectors). Returns a map of possible
-   moves (flattened boards) and their scores (rationals)."
-  (defn recursive-score [current-board]
-    (if (win? current-board)
-      (score-board current-board))
-    (let [boards (next-boards current-board)]
-      (if (empty? boards)
+(defn score-move-2 
+  "Takes a 3x3 board (vector of vectors). Returns a score by recursively evaluating
+  its child nodes in the game tree. Returns 1 if a perfectly-played game leads to a win,
+  0 if it leads to a draw, and -1 if it leads to a loss.
+  "
+  [current-board]
+  (defn score-move-recursive [current-board alpha beta]
+    (if (< beta alpha) '()
+      (if (or (win? current-board) (full? current-board))
         (score-board current-board)
-        (map recursive-score (map unflatten boards))))))
+        (let [next-moves (next-boards current-board)]
+          (if (= 0 (get-turn current-board))
+            (for [m next-moves]
+              (max-leaf (score-move-recursive (unflatten m) alpha beta)))
+            (for [m next-moves]
+              (min-leaf (score-move-recursive (unflatten m) alpha beta))))))))
+  (score-move-recursive current-board (- (.-MAX_VALUE js/Number)) (.-MAX_VALUE js/Number)))
 
-(defn full? [board]
-  (= 9 (count (remove nil? (flatten board)))))
-
-(defn score-move [current-board]
+(defn score-move 
+  "Takes a 3x3 board (vector of vectors). Returns a score by recursively evaluating
+  its child nodes in the game tree. Returns 1 if a perfectly-played game leads to a win,
+  0 if it leads to a draw, and -1 if it leads to a loss.
+  "
+  [current-board]
   (if (or (win? current-board) (full? current-board))
     (score-board current-board)
     (let [next-moves (next-boards current-board)]
@@ -241,13 +260,21 @@
         (max-leaf (map score-move (map unflatten next-moves)))
         (min-leaf (map score-move (map unflatten next-moves)))))))
 
-(defn get-square [row col board]
+(defn get-square 
+  "Returns the value of square (row, col) in the given 3x3 board."
+  [row col board]
   (nth (nth board row) col))
 
-(defn opening? [board]
+(defn opening? 
+  "Returns true if this is an opening move, else false."
+  [board]
   (= 1 (count (remove nil? (flatten board)))))
 
-(defn opening-move [board]
+(defn opening-move
+  "A cheap little heuristic to prune the game tree. Returns the optimal opening move
+  for each starting position on the game board, as calculated by minimax. Speeds up
+  minimax enough to make more complicated pruning rules unnecessary."
+  [board]
   (cond (= 1 (get-square 0 0 board)) (make-move [1 1 0] board)
         (= 1 (get-square 0 1 board)) (make-move [2 1 0] board)
         (= 1 (get-square 0 2 board)) (make-move [1 1 0] board)
@@ -258,26 +285,41 @@
         (= 1 (get-square 2 1 board)) (make-move [2 2 0] board)
         (= 1 (get-square 2 2 board)) (make-move [1 1 0] board)))
 
-(defn best-move [current-board]
+(defn best-move 
+  "Returns the best possible move from the given game state. Takes a 3x3 game board."
+  [current-board]
   (if (opening? current-board)
     (opening-move current-board)
-    (let [movescores (map vector (map score-move (map unflatten (next-boards current-board)))
-                                 (map unflatten (next-boards current-board)))]
+    (let [movescores (map vector (map score-move 
+                                      (map unflatten (next-boards current-board)))
+                                 (map unflatten 
+                                      (next-boards current-board)))]
       (second (last (sort-by first movescores))))))
 
-(defn corner? [board]
-  (not (empty? (remove nil? (map (fn [x] (get-square (first x)
-                                                     (second x)
-                                                     board))
-                                   [[0 0] [0 2] 
-                                    [2 0] [2 2]])))))
+(defn not-empty-row? 
+  "A convenience function that tests whether the given row contains only nil."
+  [row]
+  (not (empty? (remove nil? row))))
 
-(defn edge? [board]
-  (not (empty? (remove nil? (map (fn [x] (get-square (first x)
-                                                     (second x)
-                                                     board))
-                                  [[0 1] [1 0]
-                                  [1 2] [2 1]])))))
+(defn get-row-win
+  "A convenience function that returns the index of the first non-nil element in
+  the given row. Used to check for wins on the game board."
+  [row]
+  (defn iter [row i]
+    (cond (empty? row) nil
+          (nil? (first row)) (iter (rest row) (+ 1 i))
+          :else i))
+  (iter row 0))
 
-(defn center? [board]
-  (not (nil? (get-square 1 1 board))))
+(defn get-win
+  "Takes a 3x3 game board. Returns a vector [winner start middle end] of the winning player,
+  and (row, col) grid coordinates of the three-in-a-row elements.
+  "
+  [board]
+  (if (not (win? board)) nil
+    (let [ wins           (check-for-wins board)
+           winner         (if (= 1 (first (remove nil? wins))) 1 0)
+          [row col diag] (unflatten wins)]
+      (cond (not-empty-row? row)  [winner :row (get-row-win row)] 
+            (not-empty-row? col)  [winner :col (get-row-win col)]
+            (not-empty-row? diag) [winner :diag (get-row-win diag)]))))
