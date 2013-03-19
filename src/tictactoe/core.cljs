@@ -107,7 +107,7 @@
      true
   "
   [board]
-  (if (nil? board) false
+  (if (not (vector? board)) false
     (not (empty? (remove nil? (check-for-wins board))))))
 
 (defn draw?
