@@ -233,7 +233,6 @@
       (if (= 0 (get-turn current-board))
         (max-leaf (map score-move (map unflatten next-moves)))
         (min-leaf (map score-move (map unflatten next-moves)))))))
-      
 
 (defn get-square 
   "Returns the value of square (row, col) in the given 3x3 board."
@@ -270,23 +269,6 @@
                                  (map unflatten 
                                       (next-boards current-board)))]
       (second (last (sort-by first movescores))))))
-
-;(defn corner? [board]
-;  (not (empty? (remove nil? (map (fn [x] (get-square (first x)
-;                                                     (second x)
-;                                                     board))
-;                                   [[0 0] [0 2] 
-;                                    [2 0] [2 2]])))))
-;
-;(defn edge? [board]
-;  (not (empty? (remove nil? (map (fn [x] (get-square (first x)
-;                                                     (second x)
-;                                                     board))
-;                                  [[0 1] [1 0]
-;                                  [1 2] [2 1]])))))
-;
-;(defn center? [board]
-;  (not (nil? (get-square 1 1 board))))
 
 (defn not-empty-row? 
   "A convenience function that tests whether the given row contains only nil."

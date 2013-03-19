@@ -229,25 +229,7 @@
   [boards]
   (not (empty? (remove false? (map win? (map unflatten boards))))))
 
-(defn score-move-2 
-  "Takes a 3x3 board (vector of vectors). Returns a score by recursively evaluating
-  its child nodes in the game tree. Returns 1 if a perfectly-played game leads to a win,
-  0 if it leads to a draw, and -1 if it leads to a loss.
-  "
-  [current-board]
-  (defn score-move-recursive [current-board alpha beta]
-    (if (< beta alpha) '()
-      (if (or (win? current-board) (full? current-board))
-        (score-board current-board)
-        (let [next-moves (next-boards current-board)]
-          (if (= 0 (get-turn current-board))
-            (for [m next-moves]
-              (max-leaf (score-move-recursive (unflatten m) alpha beta)))
-            (for [m next-moves]
-              (min-leaf (score-move-recursive (unflatten m) alpha beta))))))))
-  (score-move-recursive current-board (- (.-MAX_VALUE js/Number)) (.-MAX_VALUE js/Number)))
-
-(defn score-move 
+(defn score-move
   "Takes a 3x3 board (vector of vectors). Returns a score by recursively evaluating
   its child nodes in the game tree. Returns 1 if a perfectly-played game leads to a win,
   0 if it leads to a draw, and -1 if it leads to a loss.
