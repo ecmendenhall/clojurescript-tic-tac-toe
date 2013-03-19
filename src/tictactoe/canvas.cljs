@@ -49,7 +49,6 @@
       o))
 
   (def o-img (load-o))
-  (.log js/console x-img)
 
   
   (defn draw-line 
