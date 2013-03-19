@@ -229,18 +229,45 @@
   [boards]
   (not (empty? (remove false? (map win? (map unflatten boards))))))
 
+(defn rotate
+  "Takes a 3x3 tic-tac-toe board. Returns the same board, rotated 90 degrees
+  to the left."
+  [board]
+  (reverse (columns board)))
+
+(defn n-rotations [n board]
+  "Rotates the given board 90 degrees to the left n times."
+  (if (= n 0) board
+    (n-rotations (dec n) (rotate board))))
+
+(defn all-rotations [board]
+  "Returns all rotations of the given board."
+  (map (fn [n] (vec (n-rotations n board)))
+       [1 2 3]))
+
+(def score-cache (atom {}))
+
 (defn score-move
   "Takes a 3x3 board (vector of vectors). Returns a score by recursively evaluating
   its child nodes in the game tree. Returns 1 if a perfectly-played game leads to a win,
   0 if it leads to a draw, and -1 if it leads to a loss.
   "
   [current-board]
-  (if (or (win? current-board) (full? current-board))
-    (score-board current-board)
-    (let [next-moves (next-boards current-board)]
-      (if (= 0 (get-turn current-board))
-        (max-leaf (map score-move (map unflatten next-moves)))
-        (min-leaf (map score-move (map unflatten next-moves)))))))
+  (let [cached-score (remove nil? (map (fn [b] (find @score-cache b)) 
+                                       (all-rotations current-board)))]
+    (if (not-empty cached-score)
+      (val (first cached-score))
+      (if (or (win? current-board) (full? current-board))
+        (let [score  (score-board current-board)
+              boards (map vector (cons current-board (all-rotations current-board))
+                                 (repeat score))]
+           (doseq [[board score] boards] 
+             (swap! score-cache assoc board score))
+           score)
+        (let [next-moves (next-boards current-board)]
+          (if (= 0 (get-turn current-board))
+            (max-leaf (map score-move (map unflatten next-moves)))
+            (min-leaf (map score-move (map unflatten next-moves)))))))))
 
 (defn get-square 
   "Returns the value of square (row, col) in the given 3x3 board."
@@ -253,9 +280,9 @@
   (= 1 (count (remove nil? (flatten board)))))
 
 (defn opening-move
-  "A cheap little heuristic to prune the game tree. Returns the optimal opening move
-  for each starting position on the game board, as calculated by minimax. Speeds up
-  minimax enough to make more complicated pruning rules unnecessary."
+  "A cheap little heuristic to prune the game tree. Returns the optimal opening 
+  move for each starting position on the game board, as calculated by minimax. 
+  Speeds up minimax enough to make more complicated pruning rules unnecessary."
   [board]
   (cond (= 1 (get-square 0 0 board)) (make-move [1 1 0] board)
         (= 1 (get-square 0 1 board)) (make-move [2 1 0] board)
@@ -268,11 +295,12 @@
         (= 1 (get-square 2 2 board)) (make-move [1 1 0] board)))
 
 (defn best-move 
-  "Returns the best possible move from the given game state. Takes a 3x3 game board."
+  "Returns the best possible move from the given game state. Takes a 3x3 game 
+  board."
   [current-board]
   (if (opening? current-board)
     (opening-move current-board)
-    (let [movescores (map vector (map score-move 
+    (let [movescores (map vector (map (memoize score-move)
                                       (map unflatten (next-boards current-board)))
                                  (map unflatten 
                                       (next-boards current-board)))]
@@ -294,8 +322,8 @@
   (iter row 0))
 
 (defn get-win
-  "Takes a 3x3 game board. Returns a vector [winner start middle end] of the winning player,
-  and (row, col) grid coordinates of the three-in-a-row elements.
+  "Takes a 3x3 game board. Returns a vector [winner start middle end] of the 
+  winning player, and (row, col) grid coordinates of the three-in-a-row elements.
   "
   [board]
   (if (not (win? board)) nil

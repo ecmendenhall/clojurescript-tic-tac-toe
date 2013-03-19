@@ -167,14 +167,6 @@
                        [nil  0  nil]
                        [ 1  nil  0 ]]))))
 
-;(deftest sum-of-leaves
-;  (is (= 80
-;         (add-leaves '(10 (5 5 (10 10 10 (5 (10 10) 5))))))))
-;
-;(deftest count-ten-leaves
-;  (is (= 10
-;         (count-leaves '((0) 1 2 (3 4) 5 (6 (7 8)) 9)))))
-
 (deftest win-on-board
   (is (= true
          (win? [[ 1 nil nil]
@@ -370,3 +362,17 @@
 (deftest no-win
   (is (= nil
          (get-win [[1 0 1] [1 0 1] [0 1 0]]))))
+
+(deftest symmetric-boards
+  (is (= [[[ 0   1  nil]
+           [nil nil  1 ]
+           [ 1   0  nil]]
+          [[nil  1  nil]
+           [ 1  nil  0]
+           [ 0  nil  1]]
+          [[nil  0   1]
+           [ 1  nil nil]
+           [nil  1   0]]]
+         (all-rotations [[ 1  nil  0]
+                         [ 0  nil  1]
+                         [nil  1  nil]])))) 
