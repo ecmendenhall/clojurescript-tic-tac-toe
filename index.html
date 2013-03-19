@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+        <style> 
+            canvas { 
+                border: 5px solid #999;
+                background-color: #eee;
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                margin-left: -260px;
+                margin-top: -260px;
+                -webkit-tap-highlight-color: transparent;
+            }
+            .container {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                margin-left: -80px;
+                margin-top: 320px;
+                width: 200px;
+            }
+            body {
+                font-family: "Ubuntu Mono", "Menlo", "Monaco", monospace;
+                font-size: 32px;
+                font-weight: bold;
+                background-color: #e2e2e2;
+            }
+            a, a:visited, a:active, a:hover { color: #777; }
+            #reset { 
+                position: absolute;
+                bottom: 10px;
+            }
+            .hidden { display: none; }
+            .visible { display: block; }
+        </style>
+        <script type="text/javascript" src="ttt-canvas.js"></script>
+    </head>
+    <body>
+        <canvas id="tictactoe-board" width="510px" height=510px"></canvas>
+        <div class="container">
+            <div class="hidden" id="reset">
+                <a href="#" id="reset-link">Play again</a>
+            </div>
+        </div>
+    </body>
+</html>
