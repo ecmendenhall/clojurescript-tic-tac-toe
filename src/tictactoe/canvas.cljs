@@ -7,6 +7,8 @@
                                     draw?
                                     get-win]]))
 
+(def board (atom empty-board))
+
 (defn get-canvas 
   "Don't tell anyone this is actually just document.getElementById()."
   [id]
@@ -27,14 +29,15 @@
   "Draws a new game board and sets the state atom to an empty board. Loads canvas
   drawing functions and listens for user clicks. Called on DOMContentLoaded."
   []
-  (def canvas  (get-canvas "tictactoe-board"))
-  (def context (.getContext canvas "2d"))
-  (def width   (.-width canvas))
-  (def step    (/ (- width 10) 3))
-  (def column-coords (for [x (range (+ step 10) width step)
-                           y [10 (- width 10)]]
-                      (list x y)))
-  (def board (atom empty-board))
+  (let [canvas (get-canvas "tictactoe-board")
+        context (.getContext canvas "2d")
+        width (.-width canvas)
+        step (/ (- width 10) 3)
+        column-coords (for [x (range (+ step 10) width step)
+                         y [10 (- width 10)]]
+                      (list x y))]
+
+  (swap! board (fn [] empty-board))
 
   (defn draw-line 
     "Canvas line wrapper. Takes start and end coordinates and a map of style attributes."
@@ -180,6 +183,6 @@
   (.addEventListener (.getElementById js/document "reset-link") 
                      "click" 
                      (fn [] (reset-canvas)
-                            (new-board))))
+                            (new-board)))))
 
 (.addEventListener js/window "load" new-board)

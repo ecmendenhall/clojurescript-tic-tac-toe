@@ -293,7 +293,7 @@
   [current-board]
   (if (opening? current-board)
     (opening-move current-board)
-    (let [movescores (map vector (map (memoize score-move)
+    (let [movescores (map vector (map score-move
                                       (map unflatten (next-boards current-board)))
                                  (map unflatten 
                                       (next-boards current-board)))]
